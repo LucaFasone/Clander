@@ -1,18 +1,24 @@
 {
   "name": "server",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch index.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.12.0",
+    "@hono/zod-validator": "^0.2.2",
     "@kinde-oss/kinde-nodejs-sdk": "^1.2.3",
     "@kinde-oss/kinde-typescript-sdk": "^2.9.1",
     "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.31.3",
+    "drizzle-zod": "^0.5.1",
     "hono": "^4.4.11",
+    "mysql2": "^3.10.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
+    "drizzle-kit": "^0.22.8",
     "tsx": "^4.7.1"
   }
 }
