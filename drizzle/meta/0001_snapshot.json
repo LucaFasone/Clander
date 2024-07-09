@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "a5b5d4b8-a505-48f1-a76c-a72576ec0400",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "7fee0e0c-daed-43a2-aa40-16e0a76b4d10",
+  "prevId": "a5b5d4b8-a505-48f1-a76c-a72576ec0400",
   "tables": {
     "Calendar": {
       "name": "Calendar",
@@ -141,13 +141,6 @@
     "CalendarsEvents": {
       "name": "CalendarsEvents",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
         "event_id": {
           "name": "event_id",
           "type": "bigint unsigned",
@@ -193,10 +186,11 @@
         }
       },
       "compositePrimaryKeys": {
-        "CalendarsEvents_id": {
-          "name": "CalendarsEvents_id",
+        "id": {
+          "name": "id",
           "columns": [
-            "id"
+            "event_id",
+            "calendar_id"
           ]
         }
       },

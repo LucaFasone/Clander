@@ -1,9 +1,21 @@
-import {index, mysqlTable, serial, varchar, timestamp, int, date, text,primaryKey} from "drizzle-orm/mysql-core";
+import {
+    index,
+    mysqlTable,
+    serial,
+    varchar,
+    timestamp,
+    int,
+    date,
+    text,
+    primaryKey,
+    bigint,
+} from "drizzle-orm/mysql-core";
 import {createInsertSchema, createSelectSchema} from "drizzle-zod";
 import {relations} from "drizzle-orm/relations";
+import {number} from "zod";
 
 export const Calendar = mysqlTable("Calendar", {
-    id: serial("id").primaryKey(),
+    id: bigint("id",{mode:'number', unsigned: true}).primaryKey().autoincrement().unique().notNull(),
     createBy: varchar("createdBy", {length:255}).notNull(),
     createAt: timestamp('created_at').defaultNow(),
 },(Calendar) => {
@@ -11,7 +23,7 @@ export const Calendar = mysqlTable("Calendar", {
 });
 
 export const Event = mysqlTable("Event", {
-    id: serial("id").primaryKey(),
+    id: bigint("id",{mode:'number', unsigned: true}).primaryKey().autoincrement().unique().notNull(),
     title: text("title").notNull(),
     date: date("date").notNull(),
     description: text("description"),
@@ -22,14 +34,12 @@ export const Event = mysqlTable("Event", {
     return {uid: index('uid').on(Event.createBy)}
 });
 
-export const eventOnCalendar = mysqlTable("CalendarsEvents", {
-    eventId: int("event_id").notNull().references(() => Event.id),
-    calendarId: int("calendar_id").notNull().references(() => Calendar.id),
-},(t)=>
-{
+export const eventOnCalendar = mysqlTable("Calendars_Events", {
+    eventId: bigint("event_id",{mode:'number', unsigned: true}).notNull().references(() => Event.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
+    calendarId: bigint("calendar_id",{mode:'number', unsigned: true}).notNull().references(() => Calendar.id,{onDelete: 'cascade', onUpdate: 'cascade'}),
+},(t) =>{
     return{
-        pk: primaryKey({ columns: [t.calendarId, t.eventId] }),
-
+        pkWithCustomName: primaryKey({ name: 'id', columns: [t.eventId, t.calendarId] }),
     }
 })
 
