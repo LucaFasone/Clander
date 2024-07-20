@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "7fee0e0c-daed-43a2-aa40-16e0a76b4d10",
-  "prevId": "a5b5d4b8-a505-48f1-a76c-a72576ec0400",
+  "id": "8b00d401-6690-4406-8a60-61d6b4a38f66",
+  "prevId": "76ab9d1e-6bf0-46df-9158-d53651482358",
   "tables": {
     "Calendar": {
       "name": "Calendar",
@@ -17,6 +17,13 @@
         "createdBy": {
           "name": "createdBy",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -39,7 +46,21 @@
           "isUnique": false
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "Calendar_createdBy_User_id_fk": {
+          "name": "Calendar_createdBy_User_id_fk",
+          "tableFrom": "Calendar",
+          "tableTo": "User",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {
         "Calendar_id": {
           "name": "Calendar_id",
@@ -120,7 +141,21 @@
           "isUnique": false
         }
       },
-      "foreignKeys": {},
+      "foreignKeys": {
+        "Event_createdBy_User_id_fk": {
+          "name": "Event_createdBy_User_id_fk",
+          "tableFrom": "Event",
+          "tableTo": "User",
+          "columnsFrom": [
+            "createdBy"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {
         "Event_id": {
           "name": "Event_id",
@@ -138,18 +173,18 @@
         }
       }
     },
-    "CalendarsEvents": {
-      "name": "CalendarsEvents",
+    "Event_On_Calendar": {
+      "name": "Event_On_Calendar",
       "columns": {
-        "event_id": {
-          "name": "event_id",
+        "calendar_id": {
+          "name": "calendar_id",
           "type": "bigint unsigned",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "calendar_id": {
-          "name": "calendar_id",
+        "event_id": {
+          "name": "event_id",
           "type": "bigint unsigned",
           "primaryKey": false,
           "notNull": true,
@@ -158,22 +193,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "CalendarsEvents_event_id_Event_id_fk": {
-          "name": "CalendarsEvents_event_id_Event_id_fk",
-          "tableFrom": "CalendarsEvents",
-          "tableTo": "Event",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
-        },
-        "CalendarsEvents_calendar_id_Calendar_id_fk": {
-          "name": "CalendarsEvents_calendar_id_Calendar_id_fk",
-          "tableFrom": "CalendarsEvents",
+        "Event_On_Calendar_calendar_id_Calendar_id_fk": {
+          "name": "Event_On_Calendar_calendar_id_Calendar_id_fk",
+          "tableFrom": "Event_On_Calendar",
           "tableTo": "Calendar",
           "columnsFrom": [
             "calendar_id"
@@ -181,16 +203,145 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "cascade"
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Event_On_Calendar_event_id_Event_id_fk": {
+          "name": "Event_On_Calendar_event_id_Event_id_fk",
+          "tableFrom": "Event_On_Calendar",
+          "tableTo": "Event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "User": {
+      "name": "User",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "User_id": {
+          "name": "User_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "User_id_unique": {
+          "name": "User_id_unique",
+          "columns": [
+            "id"
+          ]
+        }
+      }
+    },
+    "SharedEvents": {
+      "name": "SharedEvents",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "shared_to_user_id": {
+          "name": "shared_to_user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "uid": {
+          "name": "uid",
+          "columns": [
+            "id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "SharedEvents_event_id_Event_id_fk": {
+          "name": "SharedEvents_event_id_Event_id_fk",
+          "tableFrom": "SharedEvents",
+          "tableTo": "Event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "SharedEvents_shared_to_user_id_User_id_fk": {
+          "name": "SharedEvents_shared_to_user_id_User_id_fk",
+          "tableFrom": "SharedEvents",
+          "tableTo": "User",
+          "columnsFrom": [
+            "shared_to_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "id": {
-          "name": "id",
+        "SharedEvents_id": {
+          "name": "SharedEvents_id",
           "columns": [
-            "event_id",
-            "calendar_id"
+            "id"
           ]
         }
       },

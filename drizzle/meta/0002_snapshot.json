@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "76ab9d1e-6bf0-46df-9158-d53651482358",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "4ab17a21-1daf-4ebc-bef4-ebd7ac1384d7",
+  "prevId": "8b00d401-6690-4406-8a60-61d6b4a38f66",
   "tables": {
     "Calendar": {
       "name": "Calendar",
@@ -17,13 +17,6 @@
         "createdBy": {
           "name": "createdBy",
           "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -173,6 +166,56 @@
         }
       }
     },
+    "Event_On_Calendar": {
+      "name": "Event_On_Calendar",
+      "columns": {
+        "calendar_id": {
+          "name": "calendar_id",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Event_On_Calendar_calendar_id_Calendar_id_fk": {
+          "name": "Event_On_Calendar_calendar_id_Calendar_id_fk",
+          "tableFrom": "Event_On_Calendar",
+          "tableTo": "Calendar",
+          "columnsFrom": [
+            "calendar_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Event_On_Calendar_event_id_Event_id_fk": {
+          "name": "Event_On_Calendar_event_id_Event_id_fk",
+          "tableFrom": "Event_On_Calendar",
+          "tableTo": "Event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "User": {
       "name": "User",
       "columns": {
@@ -247,20 +290,6 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
-        },
-        "from": {
-          "name": "from",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "to": {
-          "name": "to",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false,
           "autoincrement": false
         }
       },

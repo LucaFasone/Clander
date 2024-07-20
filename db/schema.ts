@@ -8,15 +8,22 @@ import {
     date,
     text,
     primaryKey,
-    bigint,
+    bigint, boolean,
 } from "drizzle-orm/mysql-core";
 import {createInsertSchema, createSelectSchema} from "drizzle-zod";
 import {relations} from "drizzle-orm/relations";
 import {number} from "zod";
 
+export const User = mysqlTable("User", {
+    id: varchar("id",{length:255}).primaryKey().unique().notNull(),
+    email: varchar("email", {length: 255}).notNull(),
+    name: varchar("name", {length: 255}).notNull(),
+    surname: varchar("surname", {length: 255}),
+    createAt: timestamp('created_at').defaultNow(),
+})
 export const Calendar = mysqlTable("Calendar", {
     id: bigint("id",{mode:'number', unsigned: true}).primaryKey().autoincrement().unique().notNull(),
-    createBy: varchar("createdBy", {length:255}).notNull(),
+    createBy: varchar("createdBy", {length:255}).notNull().references(() => User.id, {onDelete: 'no action', onUpdate: 'no action'}),
     createAt: timestamp('created_at').defaultNow(),
 },(Calendar) => {
     return {uid: index('uid').on(Calendar.createBy)}
@@ -27,45 +34,81 @@ export const Event = mysqlTable("Event", {
     title: text("title").notNull(),
     date: date("date").notNull(),
     description: text("description"),
-    createBy: varchar("createdBy", {length: 255}).notNull(),
+    createBy: varchar("createdBy", {length: 255}).notNull().references(() => User.id, {onDelete: 'no action', onUpdate: 'no action'}),
     dateEnd: date("dateEnd"),
     createAt: timestamp('created_at').defaultNow(),
 },(Event) => {
     return {uid: index('uid').on(Event.createBy)}
 });
 
-export const eventOnCalendar = mysqlTable("Calendars_Events", {
-    eventId: bigint("event_id",{mode:'number', unsigned: true}).notNull().references(() => Event.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
-    calendarId: bigint("calendar_id",{mode:'number', unsigned: true}).notNull().references(() => Calendar.id,{onDelete: 'cascade', onUpdate: 'cascade'}),
-},(t) =>{
-    return{
-        pkWithCustomName: primaryKey({ name: 'id', columns: [t.eventId, t.calendarId] }),
-    }
-})
+export const sharedEvents = mysqlTable("SharedEvents", {
+    id:serial('id').primaryKey(),
+    eventId: bigint("event_id",{mode:'number', unsigned: true}).notNull().references(() => Event.id, {onDelete: 'no action', onUpdate: 'no action'}),
+    sharedFromUserId: varchar("shared_from_user_id",{length:255}).notNull().references(() => User.id, {onDelete: 'no action', onUpdate: 'no action'}),
+    sharedToUserId: varchar("shared_to_user_id",{length:255}).notNull().references(() => User.id, {onDelete: 'no action', onUpdate: 'no action'}),
+    actions: varchar("actions",{length:255}).notNull(),
+},(t) => {
+    return {uid: index('uid').on(t.id)}
+});
 
-export  const calendarRelation = relations(Calendar, ({many})=>({
-    Event: many(eventOnCalendar)
+export const EventOnCalendar = mysqlTable("Event_On_Calendar", {
+    calendarId: bigint("calendar_id",{mode:'number', unsigned: true}).notNull().references(() => Calendar.id, {onDelete: 'no action', onUpdate: 'no action'}),
+    eventId: bigint("event_id",{mode:'number', unsigned: true}).notNull().references(() => Event.id, {onDelete: 'no action', onUpdate: 'no action'}),
+});
+
+export const userRelation = relations(User, ({one,many})=>({
+    calendars: one(Calendar),
+    createdEvent: many(Event),
 
 }));
-export const eventRelation = relations(Event, ({many})=>({
-    Calendar: many(eventOnCalendar)
+
+export  const calendarRelation = relations(Calendar, ({one,many})=>({
+    EventInCalendar: many(EventOnCalendar),
 
 }));
 
-export const eventOnCalendarRelation = relations(eventOnCalendar, ({one})=>({
-    Event: one(Event,{
-        fields:[eventOnCalendar.eventId],
-        references: [Event.id]
+export const eventRelation = relations(Event, ({one,many})=>({
+    createdEventBy: one(User,{
+        fields:[Event.createBy],
+        references:[User.id]
     }),
-    Calendar: one(Calendar,{
-        fields:[eventOnCalendar.calendarId],
-        references: [Calendar.id]
-    })
+    sharedEvent: many(sharedEvents),
+    EventInCalendar: many(EventOnCalendar),
+
 }));
 
-export const insertCalendarSchema = createInsertSchema(Calendar)
+export const sharedEventsRelation = relations(sharedEvents, ({one,many})=>({
+    event: one(Event,{
+        fields:[sharedEvents.eventId],
+        references:[Event.id]
+    }),
+    sharedToUser: one(User,{
+        fields:[sharedEvents.sharedToUserId],
+        references:[User.id]
+    }),
 
-export const insertEventSchema = createInsertSchema(Event)
+}));
 
-export const selectEventsSchema = createSelectSchema(Event);
+export const eventOnCalendarRelation = relations(EventOnCalendar, ({one,many})=>({
+    event: one(Event,{
+        fields:[EventOnCalendar.eventId],
+        references:[Event.id]
+    }),
+    calendar: one(Calendar,{
+        fields:[EventOnCalendar.calendarId],
+        references:[Calendar.id]
+    }),
+}));
+
+
+
+
+export const insertCalendarSchema = createInsertSchema(Calendar).omit({id: true, createAt: true})
+
+export const insertEventSchema = createInsertSchema(Event).omit({id: true, createAt: true})
+
+export const inserUserSchema = createInsertSchema(User).omit({createAt: true})
+
+export const insertSharedEventSchema = createSelectSchema(sharedEvents).omit({id: true})
+
 
