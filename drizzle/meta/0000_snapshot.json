@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "76ab9d1e-6bf0-46df-9158-d53651482358",
+  "id": "c191a2a9-6c09-4c9b-bbba-1380dddf44e8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Calendar": {
@@ -17,13 +17,6 @@
         "createdBy": {
           "name": "createdBy",
           "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -95,9 +88,17 @@
           "notNull": true,
           "autoincrement": false
         },
+        "activeReminder": {
+          "name": "activeReminder",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
         "date": {
           "name": "date",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -118,7 +119,7 @@
         },
         "dateEnd": {
           "name": "dateEnd",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -173,6 +174,56 @@
         }
       }
     },
+    "Event_On_Calendar": {
+      "name": "Event_On_Calendar",
+      "columns": {
+        "calendar_id": {
+          "name": "calendar_id",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "Event_On_Calendar_calendar_id_Calendar_id_fk": {
+          "name": "Event_On_Calendar_calendar_id_Calendar_id_fk",
+          "tableFrom": "Event_On_Calendar",
+          "tableTo": "Calendar",
+          "columnsFrom": [
+            "calendar_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "Event_On_Calendar_event_id_Event_id_fk": {
+          "name": "Event_On_Calendar_event_id_Event_id_fk",
+          "tableFrom": "Event_On_Calendar",
+          "tableTo": "Event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
     "User": {
       "name": "User",
       "columns": {
@@ -195,6 +246,13 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "surname": {
+          "name": "surname",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "created_at": {
@@ -242,6 +300,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "shared_from_user_id": {
+          "name": "shared_from_user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "shared_to_user_id": {
           "name": "shared_to_user_id",
           "type": "varchar(255)",
@@ -249,18 +314,11 @@
           "notNull": true,
           "autoincrement": false
         },
-        "from": {
-          "name": "from",
-          "type": "date",
+        "actions": {
+          "name": "actions",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
-        },
-        "to": {
-          "name": "to",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false,
           "autoincrement": false
         }
       },
@@ -280,6 +338,19 @@
           "tableTo": "Event",
           "columnsFrom": [
             "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "SharedEvents_shared_from_user_id_User_id_fk": {
+          "name": "SharedEvents_shared_from_user_id_User_id_fk",
+          "tableFrom": "SharedEvents",
+          "tableTo": "User",
+          "columnsFrom": [
+            "shared_from_user_id"
           ],
           "columnsTo": [
             "id"

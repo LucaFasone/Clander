@@ -1,1 +1,0 @@
-ALTER TABLE `User` ADD `surname` varchar(255);

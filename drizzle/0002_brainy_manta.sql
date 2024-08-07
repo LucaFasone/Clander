@@ -1,1 +1,0 @@
-ALTER TABLE `Calendar` DROP COLUMN `title`;

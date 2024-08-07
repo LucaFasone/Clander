@@ -40,9 +40,9 @@ export const sessionManager = (c:Context): SessionManager => ({
     deleteCookie(c, key);
   },
   async destroySession() {
-    ["id_token","access_token","user","refresh_token"].forEach((key) =>{
-      deleteCookie(c, key)
-    })
+    ["id_token", "access_token", "user", "refresh_token"].forEach((key) => {
+      deleteCookie(c, key);
+    });
   }
 });
 

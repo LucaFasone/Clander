@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "8b00d401-6690-4406-8a60-61d6b4a38f66",
-  "prevId": "76ab9d1e-6bf0-46df-9158-d53651482358",
+  "id": "2208fa56-b722-4f39-a30a-3798a4c48a1e",
+  "prevId": "c191a2a9-6c09-4c9b-bbba-1380dddf44e8",
   "tables": {
     "Calendar": {
       "name": "Calendar",
@@ -17,13 +17,6 @@
         "createdBy": {
           "name": "createdBy",
           "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -57,8 +50,8 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -95,9 +88,17 @@
           "notNull": true,
           "autoincrement": false
         },
+        "activeReminder": {
+          "name": "activeReminder",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
         "date": {
           "name": "date",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -118,7 +119,7 @@
         },
         "dateEnd": {
           "name": "dateEnd",
-          "type": "date",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -152,8 +153,8 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -203,8 +204,8 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         },
         "Event_On_Calendar_event_id_Event_id_fk": {
           "name": "Event_On_Calendar_event_id_Event_id_fk",
@@ -216,8 +217,8 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -245,6 +246,13 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "surname": {
+          "name": "surname",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "created_at": {
@@ -292,8 +300,22 @@
           "notNull": true,
           "autoincrement": false
         },
+        "shared_from_user_id": {
+          "name": "shared_from_user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "shared_to_user_id": {
           "name": "shared_to_user_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "actions": {
+          "name": "actions",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
@@ -320,8 +342,21 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "SharedEvents_shared_from_user_id_User_id_fk": {
+          "name": "SharedEvents_shared_from_user_id_User_id_fk",
+          "tableFrom": "SharedEvents",
+          "tableTo": "User",
+          "columnsFrom": [
+            "shared_from_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         },
         "SharedEvents_shared_to_user_id_User_id_fk": {
           "name": "SharedEvents_shared_to_user_id_User_id_fk",
@@ -333,8 +368,8 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
         }
       },
       "compositePrimaryKeys": {
