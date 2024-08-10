@@ -2,14 +2,12 @@ import { Hono } from "hono";
 import { Event, insertEventSchema, EventOnCalendar, sharedEvents, insertSharedEventSchema } from "../db/schema";
 import { getUser } from "../kinde";
 import { db } from "../db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, asc } from "drizzle-orm";
 import { getUserCalendarId, getUserIdByEmail, userHasEvent } from "../db/Query";
-
-
 export const calendar = new Hono()
     .get("/", getUser, async (c) => {
         const calendarId = await getUserCalendarId(c.var.user.id)
-        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})`)
+        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})`).orderBy(asc(Event.date))
         return c.json({ events });
     })
     .post("/event", getUser, async (c) => {
@@ -48,7 +46,7 @@ export const calendar = new Hono()
             const calendarId = await getUserCalendarId(sharedToUserId)
             const validate = insertSharedEventSchema.parse({
                 eventId: eventId,
-                sharedToUserId: sharedToUserId,
+                sharedToUserId: sharedToUserId, 
                 sharedFromUserId: c.var.user.id,
                 actions: "view",
             })
@@ -80,5 +78,11 @@ export const calendar = new Hono()
         } catch (e) {
 
         }
+    })
+    .get("/:pageNumber", getUser, async (c) =>{
+        const pageNumber = c.req.param('pageNumber')
+        const calendarId = await getUserCalendarId(c.var.user.id)
+        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})`).limit(5).offset((4*Number(pageNumber))).orderBy(asc(Event.date))
+        return c.json({ events });
     })
 
