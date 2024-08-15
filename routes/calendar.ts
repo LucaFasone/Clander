@@ -46,7 +46,7 @@ export const calendar = new Hono()
             const calendarId = await getUserCalendarId(sharedToUserId)
             const validate = insertSharedEventSchema.parse({
                 eventId: eventId,
-                sharedToUserId: sharedToUserId, 
+                sharedToUserId: sharedToUserId,
                 sharedFromUserId: c.var.user.id,
                 actions: "view",
             })
@@ -79,10 +79,22 @@ export const calendar = new Hono()
 
         }
     })
-    .get("/:pageNumber", getUser, async (c) =>{
+    .get("/:pageNumber", getUser, async (c) => {
         const pageNumber = c.req.param('pageNumber')
         const calendarId = await getUserCalendarId(c.var.user.id)
-        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})`).limit(5).offset((4*Number(pageNumber))).orderBy(asc(Event.date))
+        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})`).limit(5).offset((4 * Number(pageNumber))).orderBy(asc(Event.date))
         return c.json({ events });
     })
+    .get("/month/:monthNumber/page/:pageNumber", getUser, async (c) => {
+        const { pageNumber, monthNumber } = c.req.param();        
+        const calendarId = await getUserCalendarId(c.var.user.id)
+        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId}) AND MONTH(Event.date) = ${monthNumber}`)
+            .limit(5)
+            .offset((4 * Number(pageNumber)))
+            .orderBy(asc(Event.date))
+            
+        return c.json({ events })
+
+
+    });
 
