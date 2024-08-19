@@ -61,7 +61,7 @@ try {
     }
     const user = await kindeClient.getUserProfile(sessionManager(c));
     c.set("user", user);
-    return next();
+    await next();
 } catch (error) {
   console.log(error)
   return c.json({error: "Unauthorized"},401);

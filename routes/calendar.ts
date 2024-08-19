@@ -4,6 +4,7 @@ import { getUser } from "../kinde";
 import { db } from "../db";
 import { eq, sql, asc } from "drizzle-orm";
 import { getUserCalendarId, getUserIdByEmail, userHasEvent } from "../db/Query";
+
 export const calendar = new Hono()
     .get("/", getUser, async (c) => {
         const calendarId = await getUserCalendarId(c.var.user.id)
@@ -94,7 +95,5 @@ export const calendar = new Hono()
             .orderBy(asc(Event.date))
             
         return c.json({ events })
-
-
     });
 

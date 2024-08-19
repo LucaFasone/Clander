@@ -4,10 +4,11 @@ import { logger } from 'hono/logger'
 import { calendar } from './routes/calendar'
 import { authRoute } from './routes/auth'
 import { shared } from './routes/shared'
+import { modify } from './routes/modify'
 
 const app = new Hono()
 app.use(logger())
-const apiRoutes = app.basePath('/api').route('/calendar', calendar).route("/", authRoute).route('/shared', shared)
+const apiRoutes = app.basePath('/api').route('/calendar', calendar).route("/", authRoute).route('/shared', shared).route('/modify',modify )
 
 serve({
   fetch: app.fetch,
