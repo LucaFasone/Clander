@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { getUser } from "../kinde";
+import { userHaveAccessToEvent } from "../common/middleware"; // implement as middleware ???
 import { userHasEvent } from "../db/Query";
 import { db } from "../db";
 import { Event, insertEventSchema } from "../db/schema";

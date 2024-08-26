@@ -14,7 +14,7 @@ export const calendar = new Hono()
     .post("/event", getUser, async (c) => {
         try {
             const { title, date, description, dateEnd, activeReminder } = await c.req.json();
-            const calendarId = await getUserCalendarId(c.var.user.id);
+            const calendarId = await getUserCalendarId(c.var.user.id);            
             const validate = insertEventSchema.parse({
                 title,
                 date: new Date(date),
@@ -36,29 +36,31 @@ export const calendar = new Hono()
             return c.json({ error: error, success: false }, 500);
         }
     })
-    .post("/sharedTo/:email", getUser, async (c) => {
+    .post("/sharedTo", getUser, async (c) => {
         try {
-            const email = c.req.param('email');
+            const { eventId, email, permissions } = await c.req.json()
             const sharedToUserId = await getUserIdByEmail(email)
-            const { eventId } = await c.req.json()
-            if (await userHasEvent(c.var.user.id, Number(eventId))) {
+            if (!await userHasEvent(c.var.user.id, Number(eventId))) {
                 return c.json({ error: "Unauthorized" }, 401)
             }
-            const calendarId = await getUserCalendarId(sharedToUserId)
-            const validate = insertSharedEventSchema.parse({
-                eventId: eventId,
-                sharedToUserId: sharedToUserId,
-                sharedFromUserId: c.var.user.id,
-                actions: "view",
-            })
-            //Chain the query
-            await db.insert(sharedEvents).values(validate)
-            await db.insert(EventOnCalendar).values({
-                calendarId: calendarId,
-                eventId: eventId,
-            })
+            if (sharedToUserId) {
+                const calendarId = await getUserCalendarId(sharedToUserId)
+                const validate = insertSharedEventSchema.parse({
+                    eventId: eventId,
+                    sharedToUserId: sharedToUserId,
+                    sharedFromUserId: c.var.user.id,
+                    actions: permissions,
+                })
 
-            return c.json({ success: true }, 200)
+                await db.insert(sharedEvents).values(validate)
+                await db.insert(EventOnCalendar).values({
+                    calendarId: calendarId,
+                    eventId: eventId,
+                })
+
+                return c.json({ success: true }, 200)
+            }
+            return c.json({ success: false, error:'Email not found' }, 404)
         } catch (e) {
             return c.json({ error: e, success: false }, 500)
         }
@@ -87,13 +89,18 @@ export const calendar = new Hono()
         return c.json({ events });
     })
     .get("/month/:monthNumber/page/:pageNumber", getUser, async (c) => {
-        const { pageNumber, monthNumber } = c.req.param();        
-        const calendarId = await getUserCalendarId(c.var.user.id)
-        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId}) AND MONTH(Event.date) = ${monthNumber}`)
-            .limit(5)
-            .offset((4 * Number(pageNumber)))
-            .orderBy(asc(Event.date))
-            
-        return c.json({ events })
+        try {
+            const { pageNumber, monthNumber } = c.req.param();
+            const calendarId = await getUserCalendarId(c.var.user.id)
+            const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId}) AND MONTH(Event.date) = ${monthNumber}`)
+                .limit(5)
+                .offset((4 * Number(pageNumber)))
+                .orderBy(asc(Event.date))
+
+            return c.json({ events })
+        } catch (e) {
+            return c.json({ error: e }, 500)
+        }
+
     });
 

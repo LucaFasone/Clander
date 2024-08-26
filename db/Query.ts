@@ -9,12 +9,19 @@ export const getUserCalendarId = async (userId:string) =>{
         .then((r) => r[0].id);
 }
 export const getUserIdByEmail = async (userEmail:string) =>{
-    const userId = await db.select({id: User.id}).from(User).where(eq(User.email, userEmail)).then((r) => r[0].id);
+    const emailExists = await db.select().from(User).where(eq(User.email, userEmail)).then((r) => r.length == 1);
+    if (!emailExists) {
+        return null;
+    }
+    const userId =  await db.select({id: User.id}).from(User).where(eq(User.email, userEmail)).then((r) => r[0].id) ;
+    console.log(userId);
+    
     return userId
 
 }
 export const userHasEvent = async (userId:string, eventId:number) =>{
     const res =  await db.select().from(Event).where(and(eq(Event.id, eventId), eq(Event.createBy,userId))).then((r) => r.length == 1);
+    
     return res
 
 }
