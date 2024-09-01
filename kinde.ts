@@ -16,7 +16,6 @@ export const kindeClient = createKindeServerClient(GrantType.AUTHORIZATION_CODE,
 });
 
 
-let store: Record<string, unknown> = {};
 
 const cookieOptions = {
   httpOnly: true,
@@ -50,6 +49,7 @@ export const sessionManager = (c:Context): SessionManager => ({
 type Env = {
   Variables: {
     user: UserType
+    timezone: string
   }
 }
 
@@ -60,7 +60,9 @@ try {
       return c.json({error: "Unauthorated"},401);
     }
     const user = await kindeClient.getUserProfile(sessionManager(c));
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     c.set("user", user);
+    c.set("timezone", timezone);
     await next();
 } catch (error) {
   console.log(error)

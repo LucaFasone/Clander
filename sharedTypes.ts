@@ -4,8 +4,8 @@ import {z} from "zod";
 export const createEvent = insertEventSchema
 export const createCalendar = insertCalendarSchema
 export type formType = {
-    date: Date,
-    dateEnd: Date | undefined,
+    date?: Date,
+    dateEnd?: Date | undefined,
     currentPage?: number | null,
     currentMonth?: number,
     title?: string,
@@ -15,5 +15,5 @@ export type formType = {
 }
 export const shareEvent = z.object({
     permission:z.union([z.literal("all"), z.literal("view"),z.literal("modify"),z.literal("sharable")]),
-    sharedToEmail: z.string().email().min(1)
+    sharedToEmail: z.string().email().optional(),
 })

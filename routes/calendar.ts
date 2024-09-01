@@ -1,14 +1,15 @@
 import { Hono } from "hono";
 import { Event, insertEventSchema, EventOnCalendar, sharedEvents, insertSharedEventSchema } from "../db/schema";
-import { getUser } from "../kinde";
+import { getUser } from "../kinde"; 
 import { db } from "../db";
 import { eq, sql, asc } from "drizzle-orm";
 import { getUserCalendarId, getUserIdByEmail, userHasEvent } from "../db/Query";
 
 export const calendar = new Hono()
-    .get("/", getUser, async (c) => {
+    .get("/:month", getUser, async (c) => {
+        const month = Number(c.req.param("month"));
         const calendarId = await getUserCalendarId(c.var.user.id)
-        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})`).orderBy(asc(Event.date))
+        const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})AND MONTH(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone})) = ${month + 1}`).orderBy(asc(Event.date))
         return c.json({ events });
     })
     .post("/event", getUser, async (c) => {
@@ -17,9 +18,9 @@ export const calendar = new Hono()
             const calendarId = await getUserCalendarId(c.var.user.id);            
             const validate = insertEventSchema.parse({
                 title,
-                date: new Date(date),
+                date: new Date(date).toISOString(),
                 description,
-                dateEnd: dateEnd ? new Date(dateEnd) : null,
+                dateEnd: dateEnd ? new Date(dateEnd).toISOString() : null,
                 createBy: c.var.user.id,
                 activeReminder,
             });

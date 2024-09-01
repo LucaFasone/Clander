@@ -16,9 +16,9 @@ export const modify = new Hono()
         }
         const validate = insertEventSchema.parse({
             title,
-            date: new Date(date),
+            date: new Date(date).toISOString(),
             description,
-            dateEnd: dateEnd ? new Date(dateEnd) : null,
+            dateEnd: dateEnd ? new Date(dateEnd).toISOString() : null,
             createBy: c.var.user.id,
             activeReminder,
         });

@@ -30,10 +30,10 @@ export const Event = mysqlTable("Event", {
     id: bigint("id",{mode:'number', unsigned: true}).primaryKey().autoincrement().unique().notNull(),
     title: text("title").notNull(),
     activeReminder: boolean("activeReminder").default(false),
-    date: timestamp("date").notNull(),
+    date: text("date").notNull(),
     description: text("description"),
     createBy: varchar("createdBy", {length: 255}).notNull().references(() => User.id, {onDelete: 'cascade', onUpdate: 'cascade'}),
-    dateEnd: timestamp("dateEnd"),
+    dateEnd: text("dateEnd"),
     createAt: timestamp('created_at').defaultNow(),
 },(Event) => {
     return {uid: index('uid').on(Event.createBy)}
@@ -105,6 +105,8 @@ export const insertCalendarSchema = createInsertSchema(Calendar).omit({id: true,
 
 export const insertEventSchema = createInsertSchema(Event,{
     title: z.string().min(2),
+    date: z.string(),
+    dateEnd: z.string()
 }).omit({id: true, createAt: true})
 
 export const inserUserSchema = createInsertSchema(User).omit({createAt: true})
