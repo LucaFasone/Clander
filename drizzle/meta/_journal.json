@@ -5,36 +5,15 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1722776061843,
-      "tag": "0000_square_bloodstrike",
+      "when": 1725300226457,
+      "tag": "0000_melted_arclight",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "5",
-      "when": 1722957455864,
-      "tag": "0001_romantic_trish_tilby",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1724883071058,
-      "tag": "0002_daily_black_widow",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1724884143855,
-      "tag": "0003_great_grandmaster",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1724885612099,
-      "tag": "0004_equal_golden_guardian",
+      "when": 1725301043833,
+      "tag": "0001_silly_jimmy_woo",
       "breakpoints": true
     }
   ]

@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "2208fa56-b722-4f39-a30a-3798a4c48a1e",
-  "prevId": "c191a2a9-6c09-4c9b-bbba-1380dddf44e8",
+  "id": "28b1edef-4b6e-48f3-8d4f-535c98d9148a",
+  "prevId": "5c240dbd-9ff8-4ada-834b-542f40e4076a",
   "tables": {
     "Calendar": {
       "name": "Calendar",
@@ -98,7 +98,7 @@
         },
         "date": {
           "name": "date",
-          "type": "timestamp",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -119,7 +119,7 @@
         },
         "dateEnd": {
           "name": "dateEnd",
-          "type": "timestamp",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -177,6 +177,13 @@
     "Event_On_Calendar": {
       "name": "Event_On_Calendar",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": true
+        },
         "calendar_id": {
           "name": "calendar_id",
           "type": "bigint unsigned",
@@ -282,6 +289,90 @@
           ]
         }
       }
+    },
+    "notification": {
+      "name": "notification",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "bigint unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_from_id": {
+          "name": "user_from_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_to_id": {
+          "name": "user_to_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "notification_event_id_Event_id_fk": {
+          "name": "notification_event_id_Event_id_fk",
+          "tableFrom": "notification",
+          "tableTo": "Event",
+          "columnsFrom": [
+            "event_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "notification_user_from_id_User_id_fk": {
+          "name": "notification_user_from_id_User_id_fk",
+          "tableFrom": "notification",
+          "tableTo": "User",
+          "columnsFrom": [
+            "user_from_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "notification_user_to_id_User_id_fk": {
+          "name": "notification_user_to_id_User_id_fk",
+          "tableFrom": "notification",
+          "tableTo": "User",
+          "columnsFrom": [
+            "user_to_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "notification_id": {
+          "name": "notification_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {}
     },
     "SharedEvents": {
       "name": "SharedEvents",
