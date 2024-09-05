@@ -10,6 +10,7 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm/relations";
 import { string, z } from "zod";
+import { permission } from "process";
 
 export const User = mysqlTable("User", {
     id: varchar("id", { length: 255 }).primaryKey().unique().notNull(),
@@ -59,6 +60,7 @@ export const notification = mysqlTable("notification", {
     eventId: bigint("event_id", { mode: 'number', unsigned: true }).notNull().references(() => Event.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     userFromId: varchar("user_from_id", { length: 255 }).notNull().references(() => User.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
     userToId: varchar("user_to_id", { length: 255 }).notNull().references(() => User.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    permissions: varchar("permissions", { length: 255 }).notNull(),
 
 })
 

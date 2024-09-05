@@ -1,0 +1,1 @@
+ALTER TABLE `notification` ADD `permissions` varchar(255) NOT NULL;

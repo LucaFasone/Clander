@@ -15,6 +15,13 @@
       "when": 1725301043833,
       "tag": "0001_silly_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1725384007183,
+      "tag": "0002_fixed_warhawk",
+      "breakpoints": true
     }
   ]
 }

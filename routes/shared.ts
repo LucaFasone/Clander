@@ -5,7 +5,7 @@ import {EventOnCalendar, sharedEvents} from "../db/schema";
 import {eq} from "drizzle-orm";
 
 export const shared = new Hono()
-    .get("/see:id", getUser,async (c) => {
+    .get("/get:id", getUser,async (c) => {
         const id = Number(c.req.param('id'));
         const result = db.select().from(sharedEvents).where(eq(sharedEvents.id, id));
         return c.json({result});
@@ -24,7 +24,7 @@ export const shared = new Hono()
                 .where(eq(sharedEvents.id, id))
                 .then((r) => r[0]);
             await db.delete(EventOnCalendar).where(eq(EventOnCalendar.eventId, eventId));
-            await db.delete(sharedEvents).where(eq(sharedEvents.id, id));
+            await db.delete(sharedEvents).where(eq(sharedEvents.eventId, id));
             return c.json({success:true},200);
         }catch (e){
             return c.json({error:e,success:false},500);
