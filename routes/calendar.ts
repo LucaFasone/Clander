@@ -7,7 +7,7 @@ import { getUserCalendarId, getUserIdByEmail, userHasEvent } from "../db/Query";
 
 export const calendar = new Hono()
     .get("/:month", getUser, async (c) => {
-        //need to add 
+        //need to add  yeart
         const month = Number(c.req.param("month"));
         const calendarId = await getUserCalendarId(c.var.user.id)
         const events = await db.select({
@@ -74,7 +74,8 @@ export const calendar = new Hono()
                 eventId: data.eventId,
             })
             await db.delete(notification).where(eq(notification.id, data.id))
-            return c.json({ success: true, idEvent: data.eventId }, 200)
+            const month = await db.select({month: sql<number>`MONTH(CONVERT_TZ(Event.date, '+00:00', "Europe/Rome"))`}).from(Event).where(eq(Event.id, data.eventId)).then((r) => r[0].month)
+            return c.json({ success: true, idEvent: data.eventId, month }, 200)
         } catch (e) {
             return c.json({ error: e, success: false }, 500)
         }

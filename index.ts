@@ -15,82 +15,82 @@ import { sharedEvents } from './db/schema'
 import { eq, or, sql } from 'drizzle-orm'
 import { getUserCalendarId } from './db/Query'
 import { Event } from './db/schema'
-type wsMessage = {
+
+export type wsMessage = {
   type: string,
-  eventId: string,
+  eventId: number,
   userId: string,
-  event?: any,//Event
+  action?: string,
+  month: number
 }
+
 const app = new Hono()
 app.use(logger())
 const apiRoutes = app.basePath('/api').route('/calendar', calendar).route("/", authRoute).route('/shared', shared).route('/modify', modify).route('/notifications', notifications)
-//i-should put this in another file dunno who tho
+//i-should put this in another file dunno how 
 //this was my frist time implemnt websocket (dont like very much)
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app })
-const rooms: { [roomName: string]: Map<string, WSContext> } = {};
+//this contains the id of the evnts and the users that are in the room
+//users can be identified by their id in the Map key
+const rooms: Map<number, Set<WSContext>> = new Map();
 
 const wsApp = app.get(
   '/ws',
   getUser,
   upgradeWebSocket((c) => ({
     async onOpen(evt, ws) {
-      const events = await db.select({ eventId: sharedEvents.eventId, from: sharedEvents.sharedFromUserId, to: sharedEvents.sharedToUserId }).from(sharedEvents).where(or(eq(sharedEvents.sharedFromUserId, c.var.user.id), eq(sharedEvents.sharedToUserId, c.var.user.id)))
-      events.forEach((event) => {
-        if (!rooms[event.eventId]) {
-          rooms[event.eventId] = new Map()
-        }
-        if (event.from === c.var.user.id && !rooms[event.eventId].has(event.from)) {
-          rooms[event.eventId].set(event.from, ws)
-        }
-        if (event.to === c.var.user.id && !rooms[event.eventId].has(event.to)) {
-          rooms[event.eventId].set(event.to, ws)
-        }
-      })
-      console.log(rooms);
+      try {
+        const event = await db.select().from(sharedEvents).where(or(eq(sharedEvents.sharedFromUserId, c.var.user.id), eq(sharedEvents.sharedToUserId, c.var.user.id)))
+        event.forEach(event => {
+          if (event.sharedFromUserId === c.var.user.id || event.sharedToUserId === c.var.user.id) {
+            if (!rooms.has(event.eventId)) {
+              rooms.set(event.eventId, new Set())
+            }
+            rooms.get(event.eventId)?.add(ws)
+          }
+        })
+      } catch (e) {
+        console.log(e);
+      }
 
     },
     async onMessage(evt, ws) {
-      const data: wsMessage = JSON.parse(evt.data)
-      //switch?
-      if (data.type === 'createroom') {
-        if (!rooms[data.eventId]) {
-          rooms[data.eventId] = new Map()
+      try {
+        const data: wsMessage = JSON.parse(evt.data.toString())
+        switch (data.type) {
+          case 'join':
+            if (!rooms.has(data.eventId)) {
+              rooms.set(data.eventId, new Set())
+            }
+            rooms.get(data.eventId)?.add(ws)
+            if (data.action == 'add')
+              rooms.get(data.eventId)?.forEach(ws => {
+                ws.send(JSON.stringify({ 'action': 'add', month: data.month }))
+              })
+            break;
+          case 'update':
+            if (!rooms.has(data.eventId)) {
+              return
+            }
+            rooms.get(data.eventId)?.forEach(ws => {
+              ws.send(JSON.stringify({ 'action': 'update ', month: data.month }))
+            })
+            break;
+          case 'delete':
+            if (!rooms.has(data.eventId)) {
+              return
+            }
+            rooms.get(data.eventId)?.forEach(ws => {
+              ws.send(JSON.stringify({ 'action': 'update', month: data.month }))
+            })
+            rooms.delete(data.eventId)
+            break;
+          default:
+            console.log('Error', data, typeof data);
         }
-        rooms[data.eventId].set(c.var.user.id, ws)
-
-      } else if (data.type === 'join') {
-        const calendarId = await getUserCalendarId(c.var.user.id)
-        const event = await db.select({
-          title: Event.title,
-          description: Event.description,
-          date: Event.date,
-          dateEnd: Event.dateEnd,
-          activeReminder: Event.activeReminder,
-        }).from(Event).where(sql`Event.id in (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId}) and Event.id = ${data.eventId}`).then((r) => r[0])
-        rooms[data.eventId].set(data.userId, ws)
-        if (ws.readyState) {
-          const month = new Date(event.date).getMonth()
-          console.log(rooms[data.eventId]);//what its seems that if i remove this the whole ws crash this has no sense
-          rooms[data.eventId].forEach((ws) => {
-            ws.send(JSON.stringify({ data: month, success: true }))
-          })
-        }
+      } catch (e) {
+        console.log(e);
       }
-      else if (data.type === 'modify') {
-        try {
-          console.log(rooms[data.eventId]);//again?....    
-          rooms[data.eventId].forEach((ws) => {
-            ws.send(JSON.stringify({ eventId: data.eventId, data: data.event, success: true, modify: true }))
-          })
-        }
-
-        catch (e) {
-          console.log(e);
-
-        }
-      }
-
-
     },
     onError(evt, ws) {
       console.error('WebSocket error:', evt)
