@@ -17,6 +17,7 @@ import { getUserCalendarId } from './db/Query'
 import { Event } from './db/schema'
 
 export type wsMessage = {
+  year: number
   type: string,
   eventId: number,
   userId: string,
@@ -32,7 +33,7 @@ const apiRoutes = app.basePath('/api').route('/calendar', calendar).route("/", a
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app })
 //this contains the id of the evnts and the users that are in the room
 //users can be identified by their id in the Map key
-const rooms: Map<number, Set<WSContext>> = new Map();
+const rooms: Map<number, Map<string, WSContext>> = new Map();
 
 const wsApp = app.get(
   '/ws',
@@ -44,11 +45,12 @@ const wsApp = app.get(
         event.forEach(event => {
           if (event.sharedFromUserId === c.var.user.id || event.sharedToUserId === c.var.user.id) {
             if (!rooms.has(event.eventId)) {
-              rooms.set(event.eventId, new Set())
+              rooms.set(event.eventId, new Map())
             }
-            rooms.get(event.eventId)?.add(ws)
+            rooms.get(event.eventId)?.set(c.var.user.id, ws)
           }
         })
+
       } catch (e) {
         console.log(e);
       }
@@ -60,20 +62,21 @@ const wsApp = app.get(
         switch (data.type) {
           case 'join':
             if (!rooms.has(data.eventId)) {
-              rooms.set(data.eventId, new Set())
+              rooms.set(data.eventId, new Map())
             }
-            rooms.get(data.eventId)?.add(ws)
+            rooms.get(data.eventId)?.set(c.var.user.id, ws)
             if (data.action == 'add')
               rooms.get(data.eventId)?.forEach(ws => {
-                ws.send(JSON.stringify({ 'action': 'add', month: data.month }))
+                ws.send(JSON.stringify({ 'action': 'add', month: data.month, year: data.year }))
               })
+
             break;
           case 'update':
             if (!rooms.has(data.eventId)) {
               return
             }
             rooms.get(data.eventId)?.forEach(ws => {
-              ws.send(JSON.stringify({ 'action': 'update ', month: data.month }))
+              ws.send(JSON.stringify({ 'action': 'update ', month: data.month, year: data.year }))
             })
             break;
           case 'delete':
@@ -81,12 +84,29 @@ const wsApp = app.get(
               return
             }
             rooms.get(data.eventId)?.forEach(ws => {
-              ws.send(JSON.stringify({ 'action': 'update', month: data.month }))
+              ws.send(JSON.stringify({ 'action': 'update', month: data.month, year: data.year }))
             })
             rooms.delete(data.eventId)
             break;
+
+          case 'deleteUser':
+            if (!rooms.has(data.eventId)) {
+              return
+            }
+            rooms.get(data.eventId)?.forEach(ws => {
+              ws.send(JSON.stringify({ 'action': 'update', month: data.month, year: data.year }))
+            })
+            for (let [key, value] of rooms?.get(data.eventId)!) {
+              if (key === c.var.user.id) {
+                rooms.get(data.eventId)?.delete(key)
+              }
+            }
+
+            break
           default:
             console.log('Error', data, typeof data);
+            break;
+
         }
       } catch (e) {
         console.log(e);

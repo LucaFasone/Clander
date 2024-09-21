@@ -6,9 +6,9 @@ import { eq, sql, asc, and } from "drizzle-orm";
 import { getUserCalendarId, getUserIdByEmail, userHasEvent } from "../db/Query";
 
 export const calendar = new Hono()
-    .get("/:month", getUser, async (c) => {
-        //need to add  yeart
+    .get("/:month/:year", getUser, async (c) => {
         const month = Number(c.req.param("month"));
+        const year = Number(c.req.param("year"));        
         const calendarId = await getUserCalendarId(c.var.user.id)
         const events = await db.select({
             id: Event.id,
@@ -21,7 +21,10 @@ export const calendar = new Hono()
             sharedFrom: sharedEvents.sharedFromUserId,
             actions: sharedEvents.actions
         }).from(Event).leftJoin(sharedEvents, eq(Event.id, sharedEvents.eventId))
-            .where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})AND MONTH(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone})) = ${month + 1}`).orderBy(asc(Event.date))
+            .where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})
+                AND MONTH(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone})) = ${month + 1} 
+                AND YEAR(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone})) = ${year}`)
+            .orderBy(asc(Event.date))
         return c.json({ events });
     })
     .post("/event", getUser, async (c) => {
@@ -74,8 +77,8 @@ export const calendar = new Hono()
                 eventId: data.eventId,
             })
             await db.delete(notification).where(eq(notification.id, data.id))
-            const month = await db.select({month: sql<number>`MONTH(CONVERT_TZ(Event.date, '+00:00', "Europe/Rome"))`}).from(Event).where(eq(Event.id, data.eventId)).then((r) => r[0].month)
-            return c.json({ success: true, idEvent: data.eventId, month }, 200)
+            const date = await db.select({ month: sql<number>`MONTH(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone}))`, year:sql<number>`YEAR(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone}))`}).from(Event).where(eq(Event.id, data.eventId)).then((r) => r[0])
+            return c.json({ success: true, idEvent: data.eventId, date }, 200)
         } catch (e) {
             return c.json({ error: e, success: false }, 500)
         }
@@ -83,7 +86,7 @@ export const calendar = new Hono()
     .delete("/event/:id", getUser, async (c) => {
         try {
             const id = c.req.param('id')
-            if (await userHasEvent(c.var.user.id, Number(id))) {
+            if (await userHasEvent(c.var.user.id, Number(id), "")) {
                 const res = await db.delete(Event).where(eq(Event.id, Number(id))).then((r) => r[0].affectedRows == 1)
                 if (res) {
                     return c.json({ success: true }, 200)
@@ -98,19 +101,19 @@ export const calendar = new Hono()
         }
     })
     .post("/getEvent", getUser, async (c) => {
-        const {idEvent} = await c.req.json();
-        const calendarId = await getUserCalendarId(c.var.user.id)        
+        const { idEvent } = await c.req.json();
+        const calendarId = await getUserCalendarId(c.var.user.id)
         const event = await db.select({
             title: Event.title,
             description: Event.description,
             date: Event.date,
-            dateEnd: Event.dateEnd ,
+            dateEnd: Event.dateEnd,
             activeReminder: Event.activeReminder,
         }).from(Event).where(sql`Event.id in (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId}) and Event.id = ${idEvent}`)
         console.log(event);
-        
-        if(!event){
-            return c.json({ error: 'not found' },401)
+
+        if (!event) {
+            return c.json({ error: 'not found' }, 401)
         }
         return c.json({ event });
     })
@@ -127,6 +130,5 @@ export const calendar = new Hono()
         } catch (e) {
             return c.json({ error: e }, 500)
         }
-
-    });
+    })
 

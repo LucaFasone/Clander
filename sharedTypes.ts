@@ -12,6 +12,7 @@ export type formType = {
     description?: string,
     activeReminder?: boolean,
     eventId?: number,
+    currentYear?: number,
 }
 export const shareEvent = z.object({
     permission:z.union([z.literal("all"), z.literal("view"),z.literal("modify"),z.literal("sharable")]),

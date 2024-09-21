@@ -10,8 +10,8 @@ import {
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm/relations";
 import { string, z } from "zod";
-import { permission } from "process";
 
+//use indexs
 export const User = mysqlTable("User", {
     id: varchar("id", { length: 255 }).primaryKey().unique().notNull(),
     email: varchar("email", { length: 255 }).notNull(),
@@ -19,6 +19,7 @@ export const User = mysqlTable("User", {
     surname: varchar("surname", { length: 255 }),
     createAt: timestamp('created_at').defaultNow(),
 })
+
 export const Calendar = mysqlTable("Calendar", {
     id: bigint("id", { mode: 'number', unsigned: true }).primaryKey().autoincrement().unique().notNull(),
     createBy: varchar("createdBy", { length: 255 }).notNull().references(() => User.id, { onDelete: 'cascade', onUpdate: 'cascade' }),

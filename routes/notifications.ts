@@ -29,7 +29,7 @@ export const notifications = new Hono()
             if (check) {
                 return c.json({ error: "Already shared" }, 400)
             }
-            if (!await userHasEvent(c.var.user.id, Id)) {
+            if (!await userHasEvent(c.var.user.id, Id, "sharable")) {
                 return c.json({ error: "Unauthorized" }, 401)
             }
             const [result] = await db.insert(notification).values({ eventId: Id, userToId: userToID, userFromId: c.var.user.id, permissions: permissions })
