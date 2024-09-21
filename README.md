@@ -21,6 +21,7 @@ Welcome to **Clander**, an application designed for creating and sharing events 
 - **Database**: [MySQL](https://www.mysql.com/it/) – A reliable relational database for storing event and user information.
 - **Caching & Real-Time Data**: [TanStack Query](https://tanstack.com/query/latest) – Provides efficient data fetching, caching, and synchronization for real-time updates.
 - **Authentication**: Currently, I am using **Kinde** for user authentication. However, the experience with Kinde has been kinda rough. Its limited flexibility makes it difficult to customize according to the app’s needs.
+  Probably in the future im gonna implement Authentication with OAuth.
 
 ## Hosting & Deployment
 
