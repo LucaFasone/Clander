@@ -7,11 +7,14 @@ import { shared } from './routes/shared'
 import { modify } from './routes/modify'
 import { notifications } from './routes/notifications'
 import { createNodeWebSocket } from '@hono/node-ws'
+import { cors } from 'hono/cors';
 import { WSContext } from 'hono/ws'
 import { getUser } from './kinde'
 import { db } from './db'
 import { sharedEvents } from './db/schema'
 import { eq, or, sql } from 'drizzle-orm'
+import { getUserCalendarId } from './db/Query'
+import { Event } from './db/schema'
 
 export type wsMessage = {
   year: number

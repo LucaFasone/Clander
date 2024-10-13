@@ -1,21 +1,14 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
-    "outDir": "./dist",
     "skipLibCheck": true,
-    "lib": ["ES2015", "DOM"],
     "types": [
       "node"
     ],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
-  },
-  "exclude": [
-    "Clander-frontend"
-  ]
+  }
 }

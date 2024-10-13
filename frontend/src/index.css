@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Niconne&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body{
+    background-color: #fff;
+}
+.mainColorsShadow {
+    color: #fcedd8;
+    text-shadow: 2px 2px 0px #eb452b, 
+    3px 3px 0px #efa032, 
+    4px 4px 0px #46b59b, 
+    5px 5px 0px #017e7f,
+    6px 6px 0px #052939;
+}
+.boxColorShadow{
+    box-shadow: 
+    1px 1px 0px #fcedd8,
+    2px 2px 0px #eb452b,
+    3px 3px 0px #efa032, 
+    4px 4px 0px #46b59b, 
+    5px 5px 0px #017e7f;
+    border-color: #fcedd8;
+}
+.backgroundColorShadow{
+    background: rgba(112, 193, 181,0.5)
+   
+}
+.calendarTheme1{
+    background-color: #DCF3EF;
+    border-color: #75C9C4 
+}
+.calendarTheme2{
+    background-color: #FFE3B7;
+    border-color: #D79965 ;
+}
+.calendarTheme3{
+    background-color: #DEA7F1;
+    border-color: #B37DD1 ;
+}
+.calendarTheme4{
+    background-color: #F1BCD7;
+    border-color: #E6AEC8;
+}
+.buttonBackground{
+    background: rgb(235,69,43);
+    background: linear-gradient(125deg, rgba(235,69,43,1) 0%, rgba(239,160,50,1) 30%, rgba(84,179,147,1) 60%, rgba(70,181,155,1) 80%, rgba(5,41,57,1) 100%);
+}
