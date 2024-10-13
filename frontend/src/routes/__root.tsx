@@ -11,7 +11,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     component: () => {
         return (
             <>
-
                 <Outlet />
             </>
         );
