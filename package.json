@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch index.ts",
-    "build": "tsc index.ts",
+    "build": "tsc",
     "start":"tsx index.ts"
   },
   "dependencies": {
