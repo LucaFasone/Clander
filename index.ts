@@ -27,6 +27,9 @@ export type wsMessage = {
 
 const app = new Hono()
 app.use(logger())
+app.use(cors({
+  origin: 'https://clander.netlify.app',
+}))
 const apiRoutes = app.basePath('/api').route('/calendar', calendar).route("/", authRoute).route('/shared', shared).route('/modify', modify).route('/notifications', notifications)
 //i-should put this in another file dunno how 
 //this was my frist time implemnt websocket (dont like very much)
