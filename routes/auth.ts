@@ -7,9 +7,11 @@ import { eq } from "drizzle-orm";
 export const authRoute = new Hono()
     .get("/login", async (c) => {
         const loginUrl = await kindeClient.login(sessionManager(c))
+        console.log(loginUrl);
         return c.redirect(loginUrl.toString());
     }).get("/register", async (c) => {
         const registerUrl = await kindeClient.register(sessionManager(c))
+        console.log(registerUrl);
         return c.redirect(registerUrl.toString());
     }).get("/callback", async (c) => {
         try {
