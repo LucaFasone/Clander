@@ -19,10 +19,13 @@ export const authRoute = new Hono()
         } catch (e) {
             console.log(e)
         }
+
     }).get("/logout", async (c) => {
         await kindeClient.logout(sessionManager(c))
         return c.redirect("https://clander.netlify.app");
     }).get("/me", getUser, async (c) => {
+        console.log('user');
+        
         const user = c.var.user;
         return c.json({ user })
     })
