@@ -29,7 +29,7 @@ const app = new Hono()
 app.use(logger())
 app.use(cors({
   origin: 'https://clander.netlify.app',
-  credentials: true.
+  credentials: true,
 }))
 const apiRoutes = app.basePath('/api').route('/calendar', calendar).route("/", authRoute).route('/shared', shared).route('/modify', modify).route('/notifications', notifications)
 //i-should put this in another file dunno how 
