@@ -56,10 +56,7 @@ type Env = {
 export const getUser = createMiddleware<Env>(async (c, next) => {
 try {
     const isAuth = await kindeClient.isAuthenticated(sessionManager(c))
-    if(!isAuth){
-      console.log("Authentication failed")
-      return c.json({error: "Unauthorized"},401);
-    }
+  
     const user = await kindeClient.getUserProfile(sessionManager(c));
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     c.set("user", user);
