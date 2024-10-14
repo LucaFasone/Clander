@@ -8,11 +8,11 @@ import { createMiddleware } from 'hono/factory'
 dotenv.config();
 
 export const kindeClient = createKindeServerClient(GrantType.AUTHORIZATION_CODE, {
-  authDomain: "https://test12345678.kinde.com",
-  clientId: "e3893931aa56469b97a59587be5d9d9b",
-  clientSecret: "gGXh3cx6DPmvCIq1sSHMuOcsEfNS6thWqNtg5i6yDxbiXddlfLi",
-  redirectURL: "https://clander-production.up.railway.app/api/callback",
-  logoutRedirectURL: "https://clander.netlify.app",
+  authDomain: process.env.KINDE_DOMAIN!,
+  clientId: process.env.KINDE_CLIENT_ID!,
+  clientSecret: process.env.KINDE_CLIENT_SECRET!,
+  redirectURL: process.env.KINDE_REDIRECT_URI!,
+  logoutRedirectURL: process.env.KINDE_LOGOUT_REDIRECT_URI!,
 });
 
 
@@ -25,7 +25,7 @@ const cookieOptions = {
 
 export const sessionManager = (c: Context): SessionManager => ({
   async getSessionItem(key: string) {
-    const result = getCookie(c, key);    
+    const result = getCookie(c, key);
     return result
   },
   async setSessionItem(key: string, value: unknown) {
@@ -56,7 +56,9 @@ type Env = {
 export const getUser = createMiddleware<Env>(async (c, next) => {
   try {
     const isAuth = await kindeClient.isAuthenticated(sessionManager(c))
+
     const user = await kindeClient.getUserProfile(sessionManager(c));
+    
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     c.set("user", user);
     c.set("timezone", timezone);
