@@ -20,14 +20,12 @@ export const kindeClient = createKindeServerClient(GrantType.AUTHORIZATION_CODE,
 const cookieOptions = {
   httpOnly: true,
   secure: true,
-  sameSite: "Lax",
+  sameSite: "None",
 } as const
 
 export const sessionManager = (c: Context): SessionManager => ({
   async getSessionItem(key: string) {
-    const result = getCookie(c, key);
-    console.log(result);
-    
+    const result = getCookie(c, key);    
     return result
   },
   async setSessionItem(key: string, value: unknown) {
@@ -58,11 +56,11 @@ type Env = {
 export const getUser = createMiddleware<Env>(async (c, next) => {
   try {
     const isAuth = await kindeClient.isAuthenticated(sessionManager(c))
-    console.log(isAuth);
-
+    if (!isAuth) {
+      console.log('not auth');
+      return c.json({ error: "Unauthorized" }, 401);
+    }
     const user = await kindeClient.getUserProfile(sessionManager(c));
-    console.log(user);
-    
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     c.set("user", user);
     c.set("timezone", timezone);
