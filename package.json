@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "tsx watch index.ts",
     "build": "tsc",
-    "start": "tsx index.ts"
+    "start": "tsx index.ts",
+    "install": "npm i"
   },
   "dependencies": {
     "@hono/node-server": "^1.12.0",
