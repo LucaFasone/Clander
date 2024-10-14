@@ -25,7 +25,6 @@ export const authRoute = new Hono()
         return c.redirect("https://clander.netlify.app");
     }).get("/me", getUser, async (c) => {
         console.log('user');
-        
         const user = c.var.user;
         return c.json({ user })
     })

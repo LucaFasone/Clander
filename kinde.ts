@@ -8,11 +8,11 @@ import { createMiddleware } from 'hono/factory'
 dotenv.config();
 
 export const kindeClient = createKindeServerClient(GrantType.AUTHORIZATION_CODE, {
-  authDomain: process.env.KINDE_DOMAIN!,
-  clientId: process.env.KINDE_CLIENT_ID!,
-  clientSecret: process.env.KINDE_CLIENT_SECRET!,
-  redirectURL: process.env.KINDE_REDIRECT_URI!,
-  logoutRedirectURL: process.env.KINDE_LOGOUT_REDIRECT_URI!,
+  authDomain: "https://test12345678.kinde.com",
+  clientId: "e3893931aa56469b97a59587be5d9d9b",
+  clientSecret: "gGXh3cx6DPmvCIq1sSHMuOcsEfNS6thWqNtg5i6yDxbiXddlfLi",
+  redirectURL: "https://clander-production.up.railway.app/api/callback",
+  logoutRedirectURL: "https://clander.netlify.app",
 });
 
 
