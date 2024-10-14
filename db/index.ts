@@ -3,12 +3,7 @@ import mysql from "mysql2/promise"
 import dotenv from "dotenv";
 dotenv.config();
 
-export const connection = await mysql.createConnection({
-    host: process.env.DB_HOST!,
-    user: process.env.DB_USER!,
-    database: process.env.DB_NAME!,
-    password: process.env.DB_PASSWORD!,
-    multipleStatements: true,
-});
+//have fun with the db 
+export const connection = await mysql.createConnection("mysql://root:scfVFhVOvPrZQsrAweeaViEOlaGeheQC@junction.proxy.rlwy.net:27873/railway");
 
 export const db = drizzle(connection);
