@@ -1,7 +1,7 @@
-import {createKindeServerClient, GrantType, SessionManager, UserType} from "@kinde-oss/kinde-typescript-sdk";
+import { createKindeServerClient, GrantType, SessionManager, UserType } from "@kinde-oss/kinde-typescript-sdk";
 import dotenv from "dotenv"
-import {Context} from "hono";
-import { setCookie,getCookie, deleteCookie } from "hono/cookie";
+import { Context } from "hono";
+import { setCookie, getCookie, deleteCookie } from "hono/cookie";
 import { createMiddleware } from 'hono/factory'
 
 
@@ -21,17 +21,19 @@ const cookieOptions = {
   httpOnly: true,
   secure: true,
   sameSite: "Lax",
-}as const
+} as const
 
-export const sessionManager = (c:Context): SessionManager => ({
+export const sessionManager = (c: Context): SessionManager => ({
   async getSessionItem(key: string) {
     const result = getCookie(c, key);
+    console.log(result);
+    
     return result
   },
   async setSessionItem(key: string, value: unknown) {
-    if(typeof value === "string"){
+    if (typeof value === "string") {
       setCookie(c, key, value, cookieOptions);
-    }else{
+    } else {
       setCookie(c, key, JSON.stringify(value), cookieOptions);
     }
   },
@@ -54,16 +56,19 @@ type Env = {
 }
 
 export const getUser = createMiddleware<Env>(async (c, next) => {
-try {
+  try {
     const isAuth = await kindeClient.isAuthenticated(sessionManager(c))
-  
+    console.log(isAuth);
+
     const user = await kindeClient.getUserProfile(sessionManager(c));
+    console.log(user);
+    
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     c.set("user", user);
     c.set("timezone", timezone);
     await next();
-} catch (error) {
-  console.log(error)
-  return c.json({error: "Unauthorized"},401);
-}
+  } catch (error) {
+    console.log(error)
+    return c.json({ error: "Unauthorized" }, 401);
+  }
 });
