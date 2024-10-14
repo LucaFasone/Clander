@@ -45,5 +45,5 @@ export const authRoute = new Hono()
                 createBy: user.id,
             })
         }
-        return c.redirect("/")
+        return c.redirect("https://clander.netlify.app")
     });
