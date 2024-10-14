@@ -2,7 +2,9 @@
   "name": "server",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch index.ts"
+    "dev": "tsx watch index.ts",
+    "start": "tsx index.ts"
+   
   },
   "dependencies": {
     "@hono/node-server": "^1.12.0",
