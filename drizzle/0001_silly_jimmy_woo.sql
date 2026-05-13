@@ -1,1 +1,0 @@
-ALTER TABLE `Event_On_Calendar` ADD `id` serial AUTO_INCREMENT;
