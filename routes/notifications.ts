@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { getUser } from "../kinde";
+import { getUser } from "../middleware/auth";
 import { getUserIdByEmail, userHasEvent } from "../db/Query";
 import { db } from "../db";
-import { Event, notification, sharedEvents, User } from "../db/schema";
+import { Event, notification, User } from "../db/schema";
 import { and, eq } from "drizzle-orm/expressions";
 
 export const notifications = new Hono()
@@ -15,7 +15,6 @@ export const notifications = new Hono()
             return c.json(notifications, 200)
         } catch (e) {
             return c.json({ error: e }, 500)
-
         }
     })
     .post('notifications', getUser, async (c) => {        

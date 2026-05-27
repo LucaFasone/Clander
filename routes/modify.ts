@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { getUser } from "../kinde";
+import { getUser } from "../middleware/auth";
 import { getUserIdByEmail, userHasEvent } from "../db/Query";
 import { db } from "../db";
 import { Event, insertEventSchema, sharedEvents } from "../db/schema";
@@ -41,7 +41,7 @@ export const modify = new Hono()
             if (!userId) {
                 return c.json({ error: "User not found", success: false }, 404);
             }
-            const result = await db.update(sharedEvents).set({ actions: permission })
+            const result = await db.update(sharedEvents).set({})
                 .where(and(eq(sharedEvents.sharedToUserId, userId), eq(sharedEvents.eventId, eventId))).then((r) => r[0]);
             if (result.affectedRows > 0) {
                 return c.json({ success: true });

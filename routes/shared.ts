@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { getUser } from "../kinde";
+import { getUser } from "../middleware/auth";
 import { db } from "../db";
 import { EventOnCalendar, sharedEvents, User } from "../db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { getUserCalendarId, userHasEvent } from "../db/Query";
 
 export const shared = new Hono()
@@ -13,8 +13,8 @@ export const shared = new Hono()
     })
     .put("/update:id", getUser, async (c) => {
         const id = Number(c.req.param('id'));
-        const { actions } = await c.req.json();
-        const result = db.update(sharedEvents).set({ actions }).where(eq(sharedEvents.id, id));
+        const { permissions } = await c.req.json();
+        const result = db.update(sharedEvents).set({ permissions }).where(eq(sharedEvents.id, id));
         return c.json({ result });
     })
     .delete("/delete:id", getUser, async (c) => {
@@ -39,7 +39,7 @@ export const shared = new Hono()
         if (!await userHasEvent(c.var.user.id, eventId, "")) {
             return c.json({ error: "You don't have permission to view this event" }, 403);
         }
-        const result = await db.select({ Email: User.email, Permission: sharedEvents.actions }).from(sharedEvents)
+        const result = await db.select({ Email: User.email, Permission: sharedEvents.permissions }).from(sharedEvents)
             .innerJoin(User, eq(sharedEvents.sharedToUserId, User.id))
             .where(eq(sharedEvents.eventId, eventId));
         return c.json({ result })

@@ -1,49 +1,92 @@
 import { Hono } from "hono";
-import { getUser, kindeClient, sessionManager } from "../kinde";
+import { getUser } from "../middleware/auth";
 import { db } from "../db";
-import { Calendar, insertCalendarSchema, inserUserSchema, User } from "../db/schema";
+import { Calendar, User } from "../db/schema";
 import { eq } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+import { sign } from "hono/jwt";
+import { setCookie, deleteCookie } from "hono/cookie";
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production" ? true : false,
+    sameSite: "Lax" as const,
+};
 
 export const authRoute = new Hono()
-    .get("/login", async (c) => {
-        const loginUrl = await kindeClient.login(sessionManager(c))
-        return c.redirect(loginUrl.toString());
-    }).get("/register", async (c) => {
-        const registerUrl = await kindeClient.register(sessionManager(c))
-        return c.redirect(registerUrl.toString());
-    }).get("/callback", async (c) => {
+    .post("/login", async (c) => {
         try {
-            const url = new URL(c.req.url)
-            await kindeClient.handleRedirectToApp(sessionManager(c), url);
-            return c.redirect("/api/createCalendar");
+            const body = await c.req.json();
+            const { email, password } = body;
+            
+            if (!email || !password) {
+                return c.json({ error: "Email and password are required" }, 400);
+            }
+
+            const users = await db.select().from(User).where(eq(User.email, email));
+            if (users.length === 0) {
+                return c.json({ error: "Invalid credentials" }, 401);
+            }
+            
+            const user = users[0];
+            const isValid = await bcrypt.compare(password, user.password);
+            
+            if (!isValid) {
+                return c.json({ error: "Invalid credentials" }, 401);
+            }
+
+            const token = await sign({ id: user.id }, process.env.JWT_SECRET || "super-secret-key-change-me", "HS256");
+            setCookie(c, "auth_token", token, cookieOptions);
+
+            return c.json({ success: true, user: { id: user.id, email: user.email, name: user.name, surname: user.surname } });
         } catch (e) {
-            console.log(e)
+            console.log(e);
+            return c.json({ error: "Internal Server Error" }, 500);
         }
-    }).get("/logout", async (c) => {
-        await kindeClient.logout(sessionManager(c))
-        return c.redirect("/");
-    }).get("/me", getUser, async (c) => {
-        const user = c.var.user;
-        return c.json({ user })
     })
-    .get("/createCalendar", getUser, async (c) => {
-        const user = c.var.user;
-        if (user === undefined) {
-            return c.json({ error: "Unauthorized" }, 401);
-        }
-        const checkIfUser = await db.select().from(Calendar).where(eq(Calendar.createBy, user.id))
-        if (checkIfUser.length === 0) {
-            const createUserRowValidate = inserUserSchema.parse({
-                id: user.id,
-                email: user.email,
-                name: user.given_name,
-                surname: user.family_name,
+    .post("/register", async (c) => {
+        try {
+            const body = await c.req.json();
+            const { email, password, name, surname } = body;
+
+            if (!email || !password || !name) {
+                return c.json({ error: "Missing required fields" }, 400);
+            }
+
+            const existingUser = await db.select().from(User).where(eq(User.email, email));
+            if (existingUser.length > 0) {
+                return c.json({ error: "Email already in use" }, 400);
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const id = crypto.randomUUID();
+
+            await db.insert(User).values({
+                id,
+                email,
+                name,
+                surname: surname || "",
+                password: hashedPassword,
             });
 
-            await db.insert(User).values(createUserRowValidate)
             await db.insert(Calendar).values({
-                createBy: user.id,
-            })
+                createBy: id,
+            });
+
+            const token = await sign({ id }, process.env.JWT_SECRET || "super-secret-key-change-me", "HS256");
+            setCookie(c, "auth_token", token, cookieOptions);
+
+            return c.json({ success: true, user: { id, email, name, surname } });
+        } catch (e) {
+            console.log(e);
+            return c.json({ error: "Internal Server Error" }, 500);
         }
-        return c.redirect("/")
+    })
+    .post("/logout", async (c) => {
+        deleteCookie(c, "auth_token", cookieOptions);
+        return c.json({ success: true });
+    })
+    .get("/me", getUser, async (c) => {
+        const user = c.var.user;
+        return c.json({ user });
     });

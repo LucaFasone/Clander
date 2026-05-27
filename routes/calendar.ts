@@ -1,14 +1,14 @@
 import { Hono } from "hono";
 import { Event, insertEventSchema, EventOnCalendar, sharedEvents, insertSharedEventSchema, notification } from "../db/schema";
-import { getUser } from "../kinde";
+import { getUser } from "../middleware/auth";
 import { db } from "../db";
 import { eq, sql, asc, and } from "drizzle-orm";
-import { getUserCalendarId, getUserIdByEmail, userHasEvent } from "../db/Query";
+import { getUserCalendarId, userHasEvent } from "../db/Query";
 
 export const calendar = new Hono()
     .get("/:month/:year", getUser, async (c) => {
         const month = Number(c.req.param("month"));
-        const year = Number(c.req.param("year"));        
+        const year = Number(c.req.param("year"));
         const calendarId = await getUserCalendarId(c.var.user.id)
         const events = await db.select({
             id: Event.id,
@@ -19,11 +19,11 @@ export const calendar = new Hono()
             activeReminder: Event.activeReminder,
             sharedTo: sharedEvents.sharedToUserId,
             sharedFrom: sharedEvents.sharedFromUserId,
-            actions: sharedEvents.actions
+            permissions: sharedEvents.permissions
         }).from(Event).leftJoin(sharedEvents, eq(Event.id, sharedEvents.eventId))
             .where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId})
-                AND MONTH(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone})) = ${month + 1} 
-                AND YEAR(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone})) = ${year}`)
+                AND CAST(strftime('%m', datetime(Event.date, ${c.var.timezone})) AS INTEGER) = ${month + 1} 
+                AND CAST(strftime('%Y', datetime(Event.date, ${c.var.timezone})) AS INTEGER) = ${year}`)
             .orderBy(asc(Event.date))
         return c.json({ events });
     })
@@ -69,7 +69,7 @@ export const calendar = new Hono()
                 eventId: data.eventId,
                 sharedToUserId: data.userToId,
                 sharedFromUserId: data.userFromId,
-                actions: data.permissions,
+                permissions: data.permissions,
             })
             await db.insert(sharedEvents).values(validate)
             await db.insert(EventOnCalendar).values({
@@ -77,7 +77,7 @@ export const calendar = new Hono()
                 eventId: data.eventId,
             })
             await db.delete(notification).where(eq(notification.id, data.id))
-            const date = await db.select({ month: sql<number>`MONTH(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone}))`, year:sql<number>`YEAR(CONVERT_TZ(Event.date, '+00:00', ${c.var.timezone}))`}).from(Event).where(eq(Event.id, data.eventId)).then((r) => r[0])
+            const date = await db.select({ month: sql<number>`CAST(strftime('%m', datetime(Event.date, ${c.var.timezone})) AS INTEGER)`, year: sql<number>`CAST(strftime('%Y', datetime(Event.date, ${c.var.timezone})) AS INTEGER)` }).from(Event).where(eq(Event.id, data.eventId)).then((r) => r[0])
             return c.json({ success: true, idEvent: data.eventId, date }, 200)
         } catch (e) {
             return c.json({ error: e, success: false }, 500)
@@ -121,7 +121,7 @@ export const calendar = new Hono()
         try {
             const { pageNumber, monthNumber } = c.req.param();
             const calendarId = await getUserCalendarId(c.var.user.id)
-            const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId}) AND MONTH(Event.date) = ${monthNumber}`)
+            const events = await db.select().from(Event).where(sql`Event.id IN (SELECT event_id FROM event_on_calendar where calendar_id = ${calendarId}) AND CAST(strftime('%m', Event.date) AS INTEGER) = ${monthNumber}`)
                 .limit(5)
                 .offset((4 * Number(pageNumber)))
                 .orderBy(asc(Event.date))

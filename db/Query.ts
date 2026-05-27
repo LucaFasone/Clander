@@ -1,4 +1,4 @@
-import { db } from "./index";
+import { db } from "../config/db"
 import { Calendar, User, Event, sharedEvents } from "./schema";
 import { eq, and } from "drizzle-orm";
 
@@ -17,14 +17,14 @@ export const getUserIdByEmail = async (userEmail: string) => {
     return userId
 
 }
-export const userHasEvent = async (userId: string, eventId: number, action: string) => {
-    let res: boolean = await db.select().from(Event).where(and(eq(Event.id, eventId), eq(Event.createBy, userId))).then((r) => r.length == 1);    
+export const userHasEvent = async (userId: string, eventId: number, permission: string) => {
+    let res: boolean = await db.select().from(Event).where(and(eq(Event.id, eventId), eq(Event.createBy, userId))).then((r) => r.length == 1);
     if (!res) {
-        const actions  = await db.select({ 'actions': sharedEvents.actions }).from(sharedEvents).where(and(eq(sharedEvents.eventId, eventId), eq(sharedEvents.sharedToUserId, userId))).then((r) => r[0]);
-        if(!actions){
+        const permissions = await db.select({ 'permissions': sharedEvents.permissions }).from(sharedEvents).where(and(eq(sharedEvents.eventId, eventId), eq(sharedEvents.sharedToUserId, userId))).then((r) => r[0]);
+        if (!permissions) {
             return res
         }
-        if (actions.actions === action || actions.actions == "all") {
+        if (permissions.permissions === permission || permissions.permissions == "all") {
             res = true
         }
     }

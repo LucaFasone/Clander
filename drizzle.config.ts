@@ -5,11 +5,9 @@ dotenv.config();
 export default defineConfig({
     schema: './db/schema.ts',
     out: './drizzle',
-    dialect: 'mysql',
+    dialect: 'sqlite',
     dbCredentials: {
-        host: process.env.DB_HOST!,
-        user: process.env.DB_USER!,
-        database: process.env.DB_NAME!,
-        password: process.env.DB_PASSWORD!,
+        url: process.env.NODE_ENV === 'production' ? process.env.TURSO_URL! : 'file:local.db',
+        authToken: process.env.NODE_ENV === 'production' ? process.env.TURSO_TOKEN! : undefined,
     },
 });

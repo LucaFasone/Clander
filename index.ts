@@ -7,27 +7,22 @@ import { shared } from './routes/shared'
 import { modify } from './routes/modify'
 import { notifications } from './routes/notifications'
 import { createNodeWebSocket } from '@hono/node-ws'
-import { cors } from 'hono/cors';
 import { WSContext } from 'hono/ws'
-import { getUser } from './kinde'
+import { getUser } from './middleware/auth'
 import { db } from './db'
 import { sharedEvents } from './db/schema'
-import { eq, or, sql } from 'drizzle-orm'
-import { getUserCalendarId } from './db/Query'
-import { Event } from './db/schema'
-
-export type wsMessage = {
-  year: number
-  type: string,
-  eventId: number,
-  userId: string,
-  action?: string,
-  month: number
-}
+import { eq, or} from 'drizzle-orm'
+import { wsMessage } from './types/wsMessage';
 
 const app = new Hono()
 app.use(logger())
-const apiRoutes = app.basePath('/api').route('/calendar', calendar).route("/", authRoute).route('/shared', shared).route('/modify', modify).route('/notifications', notifications)
+const apiRoutes = app.basePath('/api')
+.route('/calendar', calendar)
+.route("/", authRoute)
+.route('/shared', shared)
+.route('/modify', modify)
+.route('/notifications', notifications)
+
 //i-should put this in another file dunno how 
 //this was my frist time implemnt websocket (dont like very much)
 const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({ app })
